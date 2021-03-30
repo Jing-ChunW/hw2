@@ -1,49 +1,143 @@
 #include "mbed.h"
 #include "uLCD_4DGL.h"
+#include "math.h"
 
 uLCD_4DGL uLCD(D1, D0, D2);
-AnalogOut aout(PA_4);
+AnalogOut aout(D7);
 AnalogIn up(A0);
 AnalogIn down(A1);
-AnalogIn select(A2)
+AnalogIn sel(A2);
+AnalogIn ain(A3);
+
+float S, U, D;
 
 int main()
 {
     int done = 0;
-    int Freq[10];
+    int Freq[3];
     int f = 0;
-    unit16_t sample = 0;
+    int delay_time = 0;
+    float ADCdata[300];
+    int cnt;
+    float step_up, step_down;
+    float height;
+    int j;
+
+//    unit16_t sample = 0;
     // I have to set the frequency range and button connection
-    
-    uLCD.printf("\nSelection a frequency.\n");
+    Freq[0] = 100;
+    Freq[1] = 360;
+    Freq[2] = 550;
+    uLCD.printf("\nSelect a freq.\n");
+    uLCD.text_height(4);
+    uLCD.text_height(4);
+    uLCD.locate(2, 2);
+    uLCD.printf("%3d Hz", Freq[f]);
     // Analog input and LCD
     while (!done) {
-        if (select) {
-            uLCD.locate(1, 2);
-            uLCD.printf("%d Hz", Freq[f]);
-            ThisThread::sleep_for(1ms);
+        S = ceil(sel);
+        U = ceil(up);
+        D = ceil(down);     
+        if (S) {
+            uLCD.cls();
+            uLCD.text_height(1);
+            uLCD.text_height(1);
+            uLCD.printf("\nSelect a freq.");
+
+            uLCD.text_height(4);
+            uLCD.text_height(4);
+            uLCD.locate(2, 2);
+            uLCD.printf("%3d Hz", Freq[f]);
+            //ThisThread::sleep_for(2ms);
             done = 1;
-        } else if (up) {
-            uLCD.locate(1, 2);
-            if (f + 1 < n) f++;
-            else uLCD.printf("\nCan't be larger.\n")
-            uLCD.printf("%d Hz", Freq[f]);
-            ThisThread::sleep_for(1ms);
-        } else if (down) {
-            uLCD.locate(1, 2);
-            if (f - 1 >= 0) f--;
-            else uLCD.printf("\nCan't be smaller.\n")
-            uLCD.printf("%d Hz", Freq[f]);
-            ThisThread::sleep_for(1ms);
+        } else if (U) {
+            if (f + 1 < 3) {
+                f++;
+                uLCD.cls();
+                uLCD.text_height(1);
+                uLCD.text_height(1);
+                uLCD.printf("\nSelect a freq.");
+                uLCD.text_height(4);
+                uLCD.text_height(4);
+                uLCD.locate(2, 2);
+                uLCD.printf("%3d Hz", Freq[f]);
+            } else {
+                uLCD.locate(0, 1);
+                uLCD.text_height(1);
+                uLCD.text_height(1);
+                uLCD.printf("Can't be larger.\n");
+
+                uLCD.text_height(4);
+                uLCD.text_height(4);
+                uLCD.locate(2, 2);
+                uLCD.printf("%3d Hz", Freq[f]);
+            }
+            //ThisThread::sleep_for(2ms);
+        } else if (D) {
+            if (f - 1 >= 0) {
+                f--;
+                uLCD.cls();
+                uLCD.text_height(1);
+                uLCD.text_height(1);
+                uLCD.printf("\nSelect a freq.");
+
+                uLCD.text_height(4);
+                uLCD.text_height(4);
+                uLCD.locate(2, 2);
+                uLCD.printf("%3d Hz", Freq[f]);
+            } else {
+                uLCD.locate(0, 1);
+                uLCD.text_height(1);
+                uLCD.text_height(1);
+                uLCD.printf("Can't be smaller.\n");
+                uLCD.text_height(4);
+                uLCD.text_height(4);
+                uLCD.locate(2, 2);
+                uLCD.printf("%3d Hz", Freq[f]);
+            }
+            //ThisThread::sleep_for(2ms);
         }
+        ThisThread::sleep_for(50ms);
     }
+    if (f == 0) delay_time = 85;
+    else if (f == 1) delay_time = 13;
+    else if (f == 2) delay_time = 4;
     // make triangle waveform and frequency is selected above
     // Analog output
+    step_up = 1/77.0;
+    step_down = 1/33.0;
+    height = 3/3.3;
+    j = 0;
+    cnt = 0;
     while(1) {
-        for (int i = 0; i <= 10; i++) {
-            if (i <= 7) {
-                sample = 3/7
+        for (float i = 0.0; i < height; i += step_up) {
+            aout = i;
+            if (j < 300) {
+                ADCdata[j] = ain;
+                j++;
+            }
+            wait_us(delay_time);
+        }
+        for (float i = height; i > 0.0; i -= step_down) {
+            aout = i;
+            if (j < 300) {
+                ADCdata[j] = ain;
+                j++;
+            }
+            wait_us(delay_time);
+        }
+        if (!cnt) {
+            if (j == 300) {
+                cnt++;
+                for (int k = 0; k < 300; k++) {
+                    printf("%f\r\n", ADCdata[k]);
+                    ThisThread::sleep_for(100ms);
+                }
             }
         }
+
     }
+
+
+
 }
