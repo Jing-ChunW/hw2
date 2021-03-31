@@ -37,6 +37,6 @@ ax[0].set_ylabel('Amplitude')
 ax[1].plot(frq,abs(Y),'r') # plotting the spectrum
 ax[1].set_xlabel('Freq (Hz)')
 ax[1].set_ylabel('|Y(freq)|')
-
+ax[1].set_xlim(1, 1000)
 plt.show()
 s.close()
