@@ -109,6 +109,7 @@ int main()
     height = 3/3.3;
     j = 0;
     cnt = 0;
+    printf("%d\r\n", Freq[f]);
     while(1) {
         for (float i = 0.0; i < height; i += step_up) {
             aout = i;
